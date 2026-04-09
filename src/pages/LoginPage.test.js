@@ -49,7 +49,6 @@ describe('LoginPage', () => {
   });
 
   test('clears error message when user starts typing in email field', async () => {
-    const user = userEvent.setup();
     render(<LoginPage onLogin={mockOnLogin} />);
     
     const submitButton = screen.getByRole('button', { name: /submit login form/i });
@@ -60,7 +59,7 @@ describe('LoginPage', () => {
     });
     
     const emailInput = screen.getByLabelText(/email/i);
-    await user.type(emailInput, 'test@example.com');
+    await userEvent.type(emailInput, 'test@example.com');
     
     await waitFor(() => {
       expect(screen.queryByText('Email is required')).not.toBeInTheDocument();
@@ -68,7 +67,6 @@ describe('LoginPage', () => {
   });
 
   test('clears error message when user starts typing in password field', async () => {
-    const user = userEvent.setup();
     render(<LoginPage onLogin={mockOnLogin} />);
     
     const submitButton = screen.getByRole('button', { name: /submit login form/i });
@@ -79,7 +77,7 @@ describe('LoginPage', () => {
     });
     
     const passwordInput = screen.getByLabelText(/password/i);
-    await user.type(passwordInput, 'password123');
+    await userEvent.type(passwordInput, 'password123');
     
     await waitFor(() => {
       expect(screen.queryByText('Password is required')).not.toBeInTheDocument();
@@ -87,16 +85,15 @@ describe('LoginPage', () => {
   });
 
   test('calls onLogin with email and password when form is submitted with valid data', async () => {
-    const user = userEvent.setup();
     render(<LoginPage onLogin={mockOnLogin} />);
     
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
     const submitButton = screen.getByRole('button', { name: /submit login form/i });
     
-    await user.type(emailInput, 'user@example.com');
-    await user.type(passwordInput, 'password123');
-    await user.click(submitButton);
+    await userEvent.type(emailInput, 'user@example.com');
+    await userEvent.type(passwordInput, 'password123');
+    fireEvent.click(submitButton);
     
     expect(mockOnLogin).toHaveBeenCalledWith('user@example.com', 'password123');
   });
