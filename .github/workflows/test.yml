@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x]
 
     steps:
     - uses: actions/checkout@v4
@@ -25,6 +25,12 @@ jobs:
     
     - name: Install dependencies
       run: npm install
+    
+    - name: Run LoginPage tests
+      run: npm test -- --testPathPattern="LoginPage.test.js$" --coverage --watchAll=false
+    
+    - name: Run GalleryPage drag-drop tests
+      run: npm test -- --testPathPattern="GalleryPage.test.js$" --coverage --watchAll=false
     
     - name: Comprehensive Accessibility Checks
       run: |
@@ -111,6 +117,28 @@ jobs:
         echo "---"
         echo "Checking for role='alert' on error messages..."
         grep -r 'role="alert"' src/pages/ && echo "✓ alert role on error messages found" || echo "⚠ Warning: Error messages should have role='alert'"
+        echo ""
+        
+        echo "9️⃣  DRAG & DROP ACCESSIBILITY"
+        echo "---"
+        echo "Checking for draggable elements..."
+        grep -r "draggable" src/pages/ && echo "✓ draggable elements found" || echo "ℹ️  No draggable elements (not required for this page)"
+        echo ""
+        
+        echo "Checking for drag event handlers..."
+        grep -r "onDragStart\|onDragOver\|onDrop\|onDragEnd" src/pages/ && echo "✓ drag event handlers found" || echo "ℹ️  No drag event handlers (not required for this page)"
+        echo ""
+        
+        echo "Checking for alt attributes on gallery images..."
+        grep -r 'alt=' src/pages/ && echo "✓ alt attributes on images found" || echo "⚠ Warning: Gallery images should have alt text"
+        echo ""
+        
+        echo "Checking for aria-label or title on draggable items..."
+        grep -r "aria-label.*drag\|draggable.*aria-label\|title=" src/pages/ && echo "✓ aria-label/title on draggable items found" || echo "ℹ️  Consider adding aria-label to draggable items for better accessibility"
+        echo ""
+        
+        echo "Checking for instructions text..."
+        grep -r "instruction\|drag.*drop\|reorder" src/pages/ && echo "✓ instructions for drag-drop found" || echo "⚠ Warning: Add instructions for drag-drop functionality"
         echo ""
         
         echo "=========================================="

@@ -48,12 +48,12 @@ function GalleryPage({ onLogout }) {
       <div className="gallery-card">
         <div className="header">
           <h1>Drag & Drop Gallery</h1>
-          <button className="logout-btn" onClick={onLogout}>Logout</button>
+          <button className="logout-btn" onClick={onLogout} aria-label="Logout from gallery">Logout</button>
         </div>
 
         <p className="instructions">Drag and drop images to reorder them</p>
 
-        <div className="gallery-grid">
+        <div className="gallery-grid" role="region" aria-label="Draggable gallery items">
           {images.map((image, index) => (
             <div
               key={image.id}
@@ -63,6 +63,10 @@ function GalleryPage({ onLogout }) {
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, index)}
               onDragEnd={handleDragEnd}
+              role="button"
+              tabIndex={0}
+              aria-label={`${image.title}, position ${index + 1} of ${images.length}. Drag to reorder`}
+              title={`Drag ${image.title} to reorder`}
             >
               <img src={image.url} alt={image.title} />
               <div className="image-title">{image.title}</div>
