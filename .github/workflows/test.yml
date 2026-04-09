@@ -30,6 +30,10 @@ jobs:
       run: npm install -D @playwright/test
       continue-on-error: true
     
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+      continue-on-error: true
+    
     - name: Run Jest Accessibility Tests (5 Tests)
       run: npm test -- --testPathPattern="Accessibility.test.js$" --watchAll=false
     
