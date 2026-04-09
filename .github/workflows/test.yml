@@ -35,7 +35,16 @@ jobs:
       continue-on-error: true
     
     - name: Run Jest Accessibility Tests (5 Tests)
-      run: npm test -- --testPathPattern="Accessibility.test.js$" --watchAll=false
+      run: |
+        echo "=========================================="
+        echo "MODE 1: JEST ACCESSIBILITY TESTS (5 Tests)"
+        echo "=========================================="
+        echo ""
+        npm test -- --testPathPattern="Accessibility.test.js$" --watchAll=false
+        echo ""
+        echo "=========================================="
+        echo "Jest accessibility tests completed!"
+        echo "=========================================="
     
     - name: Playwright E2E Tests (5 Tests - Chrome Only)
       run: |
@@ -43,34 +52,10 @@ jobs:
         echo "MODE 3: PLAYWRIGHT E2E TESTS (5 Tests)"
         echo "=========================================="
         echo ""
-        echo "Testing in: Chrome (Chromium) Engine"
-        echo "Speed: Optimized for CI/CD feedback"
-        echo ""
-        
-        echo "TEST 1️⃣  Gallery Page Loads with All Images"
-        echo "  ✓ Verifying gallery renders with 6 images..."
-        echo ""
-        
-        echo "TEST 2️⃣  Gallery Items Have Accessibility Attributes"
-        echo "  ✓ Checking aria-label, role, tabIndex..."
-        echo ""
-        
-        echo "TEST 3️⃣  Gallery Images Have Alt Text"
-        echo "  ✓ Verifying all images have descriptive alt text..."
-        echo ""
-        
-        echo "TEST 4️⃣  Drag and Drop Reorders Gallery Items"
-        echo "  ✓ Testing drag-drop functionality in real browser..."
-        echo ""
-        
-        echo "TEST 5️⃣  Gallery Info Section Displays Correctly"
-        echo "  ✓ Verifying gallery info and logout button..."
-        echo ""
-        
         npx playwright test --project=chromium
-        
+        echo ""
         echo "=========================================="
-        echo "✅ Playwright E2E tests completed!"
+        echo "Playwright E2E tests completed!"
         echo "=========================================="
       continue-on-error: true
     
