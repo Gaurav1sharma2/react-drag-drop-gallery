@@ -7,8 +7,17 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  call-shared-tests:
+    uses: Gaurav1sharma2/mAuthor/.github/workflows/shared-tests.yml@main
+    with:
+      repository: react-form-interactions
+      test-file: shared-tests/login.spec.js
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
   test:
     runs-on: ubuntu-latest
+    needs: call-shared-tests
 
     strategy:
       matrix:
@@ -160,12 +169,12 @@ jobs:
       continue-on-error: true
     
     # ============================================
-    # STEP 11: Build Application
+    # STEP 10: Build Application
     # ============================================
     - name: Build Application
       run: |
         echo "=========================================="
-        echo "STEP 11: BUILDING APPLICATION"
+        echo "STEP 10: BUILDING APPLICATION"
         echo "=========================================="
         npm run build
         echo "=========================================="
