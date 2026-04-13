@@ -13,11 +13,10 @@ jobs:
       repository: react-form-interactions
       test-file: shared-tests/login.spec.js
     secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
+      token: ${{ secrets.WORKFLOW_TOKEN }}
 
   test:
     runs-on: ubuntu-latest
-    needs: call-shared-tests
 
     strategy:
       matrix:
