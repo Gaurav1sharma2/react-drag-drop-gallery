@@ -22,6 +22,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       testMatch: '**/gallery.spec.js',
       fullyParallel: true,
+      workers: 4,
     },
     
     // Scenario 2: Multi-Browser - SEQUENTIAL (Comprehensive)
@@ -30,18 +31,21 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
       testMatch: '**/gallery.spec.js',
       fullyParallel: false,
+      workers: 1,
     },
     {
       name: 'firefox-sequential',
       use: { ...devices['Desktop Firefox'] },
       testMatch: '**/gallery.spec.js',
       fullyParallel: false,
+      workers: 1,
     },
     {
       name: 'webkit-sequential',
       use: { ...devices['Desktop Safari'] },
       testMatch: '**/gallery.spec.js',
       fullyParallel: false,
+      workers: 1,
     },
   ],
 
