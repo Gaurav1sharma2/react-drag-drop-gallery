@@ -150,9 +150,9 @@ jobs:
         echo "STEP 10: MODE 4 - PLAYWRIGHT MULTI-BROWSER TESTS (Comprehensive)"
         echo "=========================================="
         echo ""
-        echo "Running 3 tests on Chrome, Firefox, WebKit (Sequential)"
+        echo "Running 3 tests on Chrome, Firefox, WebKit (Sequential - 1 worker)"
         echo ""
-        npx playwright test --project=chromium-sequential --project=firefox-sequential --project=webkit-sequential
+        npx playwright test --project=chromium-sequential --project=firefox-sequential --project=webkit-sequential --workers=1
         echo ""
         echo "=========================================="
         echo "✅ Playwright multi-browser tests completed!"
