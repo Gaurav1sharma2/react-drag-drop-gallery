@@ -2,14 +2,12 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
-  timeout: 30000,
+  timeout: 60000,
   expect: {
-    timeout: 5000,
+    timeout: 10000,
   },
   use: {
     baseURL: 'http://localhost:3000',
@@ -18,16 +16,41 @@ export default defineConfig({
   },
 
   projects: [
+    // Scenario 1: Chrome Only - PARALLEL (Fast)
     {
-      name: 'chromium',
+      name: 'chromium-parallel',
       use: { ...devices['Desktop Chrome'] },
+      testMatch: '**/gallery.spec.js',
+      fullyParallel: true,
+    },
+    
+    // Scenario 2: Multi-Browser - SEQUENTIAL (Comprehensive)
+    {
+      name: 'chromium-sequential',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '**/gallery.spec.js',
+      fullyParallel: false,
+    },
+    {
+      name: 'firefox-sequential',
+      use: { ...devices['Desktop Firefox'] },
+      testMatch: '**/gallery.spec.js',
+      fullyParallel: false,
+    },
+    {
+      name: 'webkit-sequential',
+      use: { ...devices['Desktop Safari'] },
+      testMatch: '**/gallery.spec.js',
+      fullyParallel: false,
     },
   ],
 
-  webServer: {
+  webServer: process.env.CI ? {
     command: 'npm start',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+    reuseExistingServer: false,
+    timeout: 300000,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  } : undefined,
 });

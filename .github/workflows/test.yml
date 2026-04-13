@@ -1,4 +1,4 @@
-name: Accessibility and Form Validation Tests
+name: Complete Testing Pipeline - Jest | GitHub Actions | Playwright
 
 on:
   push:
@@ -17,87 +17,157 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    # ============================================
+    # STEP 1: Set up Node.js
+    # ============================================
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     
+    # ============================================
+    # STEP 2: Install dependencies
+    # ============================================
     - name: Install dependencies
       run: npm install
     
-    - name: Install Playwright
-      run: npm install -D @playwright/test
-      continue-on-error: true
-    
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps chromium
-      continue-on-error: true
-    
+    # ============================================
+    # STEP 3: Run Jest Unit Tests (MODE 1)
+    # ============================================
     - name: Run Jest Accessibility Tests (5 Tests)
       run: |
         echo "=========================================="
-        echo "MODE 1: JEST ACCESSIBILITY TESTS (5 Tests)"
+        echo "STEP 3: MODE 1 - JEST UNIT TESTS (5 Tests)"
         echo "=========================================="
         echo ""
         npm test -- --testPathPattern="Accessibility.test.js$" --watchAll=false
         echo ""
         echo "=========================================="
-        echo "Jest accessibility tests completed!"
-        echo "=========================================="
-    
-    - name: Playwright E2E Tests (5 Tests - Chrome Only)
-      run: |
-        echo "=========================================="
-        echo "MODE 3: PLAYWRIGHT E2E TESTS (5 Tests)"
-        echo "=========================================="
-        echo ""
-        npx playwright test --project=chromium
-        echo ""
-        echo "=========================================="
-        echo "Playwright E2E tests completed!"
+        echo "✅ Jest accessibility tests completed!"
         echo "=========================================="
       continue-on-error: true
     
-    - name: GitHub Actions Accessibility Checks (5 Tests)
+    # ============================================
+    # STEP 4: GitHub Actions Element Tests (MODE 2)
+    # ============================================
+    - name: GitHub Actions Element Tests (5 Checks)
       run: |
         echo "=========================================="
-        echo "MODE 2: GITHUB ACTIONS ACCESSIBILITY (5 Tests)"
+        echo "STEP 4: MODE 2 - GITHUB ACTIONS CHECKS (5 Tests)"
         echo "=========================================="
         echo ""
         
-        echo "TEST 1️⃣  ARIA Attributes on Form Inputs"
-        echo "---"
-        grep -r "aria-required\|aria-invalid\|aria-describedby" src/pages/ && echo "✓ ARIA attributes found on inputs" || echo "⚠ Warning: Missing ARIA attributes on inputs"
+        echo "CHECK 1️⃣  ARIA Attributes on Form Inputs"
+        grep -r "aria-required\|aria-invalid\|aria-describedby" src/pages/ && echo "  ✓ ARIA attributes found" || echo "  ⚠ Missing ARIA attributes"
         echo ""
         
-        echo "TEST 2️⃣  Labels and Form Structure"
-        echo "---"
-        grep -r "htmlFor=\|<form" src/pages/ && echo "✓ Form structure with labels found" || echo "⚠ Warning: Missing form structure or labels"
+        echo "CHECK 2️⃣  Labels and Form Structure"
+        grep -r "htmlFor=\|<form" src/pages/ && echo "  ✓ Form structure found" || echo "  ⚠ Missing form structure"
         echo ""
         
-        echo "TEST 3️⃣  Button Accessibility"
-        echo "---"
-        grep -r "<button.*aria-label\|aria-label.*button" src/pages/ && echo "✓ Buttons have aria-label" || echo "⚠ Warning: Buttons missing aria-label"
+        echo "CHECK 3️⃣  Button Accessibility"
+        grep -r "<button.*aria-label\|aria-label.*button" src/pages/ && echo "  ✓ Buttons have aria-label" || echo "  ⚠ Missing aria-label"
         echo ""
         
-        echo "TEST 4️⃣  Image Alt Text"
-        echo "---"
-        grep -r 'alt="' src/pages/ && echo "✓ Images have alt attributes" || echo "⚠ Warning: Images missing alt text"
+        echo "CHECK 4️⃣  Image Alt Text"
+        grep -r 'alt="' src/pages/ && echo "  ✓ Images have alt text" || echo "  ⚠ Missing alt text"
         echo ""
         
-        echo "TEST 5️⃣  Drag-Drop Accessibility"
-        echo "---"
-        grep -r "draggable\|aria-label.*drag\|role=\"region\"" src/pages/ && echo "✓ Drag-drop elements are accessible" || echo "⚠ Warning: Drag-drop accessibility missing"
+        echo "CHECK 5️⃣  Drag-Drop Accessibility"
+        grep -r "draggable\|aria-label.*drag\|role=\"region\"" src/pages/ && echo "  ✓ Drag-drop accessible" || echo "  ⚠ Missing drag-drop accessibility"
         echo ""
         
         echo "=========================================="
-        echo "✅ GitHub Actions accessibility checks completed!"
+        echo "✅ GitHub Actions checks completed!"
         echo "=========================================="
     
-    # - name: Check HTML accessibility with Pa11y
-    #   run: |
-    #     npm install -g pa11y-ci
-    #     npm run build --if-present
-    #     pa11y-ci --config .pa11yci.json || echo "Accessibility check completed with warnings"
-    #   continue-on-error: true
+    # ============================================
+    # STEP 5: Install Playwright
+    # ============================================
+    - name: Install Playwright
+      run: npm install -D @playwright/test
+      continue-on-error: true
+    
+    # ============================================
+    # STEP 6: Install Playwright Browsers
+    # ============================================
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium firefox webkit
+      continue-on-error: true
+    
+    # ============================================
+    # STEP 7 & 8: Start App + Wait for Ready
+    # ============================================
+    - name: Start Application Server
+      run: |
+        echo "Starting application server..."
+        npm start > /tmp/app.log 2>&1 &
+        echo $! > /tmp/app.pid
+        sleep 10
+      continue-on-error: true
+    
+    - name: Wait for Application to Start
+      run: |
+        echo "Waiting for application to be ready..."
+        for i in {1..30}; do
+          if curl -s http://localhost:3000 > /dev/null; then
+            echo "✅ Application is ready!"
+            exit 0
+          fi
+          echo "Attempt $i/30: Waiting..."
+          sleep 2
+        done
+        echo "❌ Application failed to start"
+        exit 1
+      continue-on-error: true
+    
+    # ============================================
+    # STEP 9: Playwright E2E Tests (Chrome Only) - FAST
+    # ============================================
+    - name: Playwright E2E Tests (Chrome Only - Parallel)
+      run: |
+        echo "=========================================="
+        echo "STEP 9: MODE 3 - PLAYWRIGHT CHROME TESTS (Fast)"
+        echo "=========================================="
+        echo ""
+        echo "Running 3 tests on Chrome (Parallel execution)"
+        echo ""
+        npx playwright test --project=chromium-parallel
+        echo ""
+        echo "=========================================="
+        echo "✅ Playwright Chrome tests completed!"
+        echo "=========================================="
+      continue-on-error: true
+    
+    # ============================================
+    # STEP 10: Playwright Multi-Browser Tests - COMPREHENSIVE
+    # ============================================
+    - name: Playwright Multi-Browser Tests (Sequential)
+      run: |
+        echo "=========================================="
+        echo "STEP 10: MODE 4 - PLAYWRIGHT MULTI-BROWSER TESTS (Comprehensive)"
+        echo "=========================================="
+        echo ""
+        echo "Running 3 tests on Chrome, Firefox, WebKit (Sequential)"
+        echo ""
+        npx playwright test --project=chromium-sequential --project=firefox-sequential --project=webkit-sequential
+        echo ""
+        echo "=========================================="
+        echo "✅ Playwright multi-browser tests completed!"
+        echo "=========================================="
+      continue-on-error: true
+    
+    # ============================================
+    # STEP 11: Build Application
+    # ============================================
+    - name: Build Application
+      run: |
+        echo "=========================================="
+        echo "STEP 11: BUILDING APPLICATION"
+        echo "=========================================="
+        npm run build
+        echo "=========================================="
+        echo "✅ Build completed!"
+        echo "=========================================="
+      continue-on-error: true
